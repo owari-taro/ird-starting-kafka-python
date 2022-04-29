@@ -12,16 +12,18 @@ public class KafkaProducerFactory {
     private static final String BOOTSTRAP_SERVERS = "127.0.0.1:29092";
     private static final String SERIALIZER_NAME = "org.apache.kafka.common.serialization.StringSerializer";
     private static final String CLIENT_ID = "basic-producer-rest-1";
+    private static final KafkaProducer<String, String> INSTANCE = new KafkaProducer<>(getProducerConfig());
 
     private KafkaProducerFactory() {
     }
 
     /**
-     * KafkaProducerの新しいインスタンスを生成するファクトリメソッド.
+     * KafkaProducerのインスタンスを返すファクトリメソッド.
+     * インスタンスはシングルトンである.
      * @return KafkaProducerインスタンス
      */
     public static KafkaProducer<String, String> newInstance() {
-        return new KafkaProducer<>(getProducerConfig());
+        return INSTANCE;
     }
 
     private static Properties getProducerConfig() {
