@@ -1,56 +1,42 @@
 package net.ponzmild.producer.controller;
 
-import io.javalin.http.Handler;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.javalin.http.Context;
 import io.javalin.http.HttpCode;
 import net.ponzmild.producer.domain.TicketOrder;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class OrderController {
-    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
     private static final String TOPIC = "ticket-order";
 
     private final KafkaProducer<String, String> producer;
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public OrderController(KafkaProducer<String, String> producer) {
         this.producer = producer;
     }
 
-    public Handler createOrder() {
-        return ctx -> {
-            logger.info("Called create ticket order endpoint.");
+    public void createOrder(Context ctx) throws ExecutionException, InterruptedException, TimeoutException, JsonProcessingException {
+        // リクエストからTopicに送信するイベントを組み立て
+        CreateOrderRequest request = ctx.bodyAsClass(CreateOrderRequest.class);
+        TicketOrder order = new TicketOrder(request.getContentId(), request.getUserId());
+        String recordValueString = mapper.writeValueAsString(order);
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, order.getOrderId(), recordValueString);
 
-            // リクエストからTopicに送信するイベントを組み立て
-            CreateOrderRequest request = ctx.bodyAsClass(CreateOrderRequest.class);
-            TicketOrder order = new TicketOrder(request.getContentId(), request.getUserId());
-            ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, order.getOrderId(), order.toString());
+        // Topicにデータを非同期に送信
+        Future<RecordMetadata> sendFuture = producer.send(producerRecord);
+        // 結果待ち
+        sendFuture.get(5L, TimeUnit.SECONDS);
 
-            // Topicにデータを非同期に送信
-            Future<RecordMetadata> sendFuture = producer.send(producerRecord, (metadata, exception) -> {
-                if (exception == null) {
-                    logger.info("Producer sent record: topic={}, partition={}, offset={}", metadata.topic(), metadata.partition(),
-                            metadata.offset());
-                } else {
-                    exception.printStackTrace();
-                    logger.error("Producer got error w/ send()", exception);
-                }
-            });
-
-            // 結果待ち
-            try {
-                sendFuture.get(5L, TimeUnit.SECONDS);
-                // レスポンスをクライアントに返す
-                ctx.status(HttpCode.CREATED).result(order.getOrderId());
-            } catch (Exception e) {
-                logger.error("Failed to send message!?", e);
-                ctx.status(HttpCode.INTERNAL_SERVER_ERROR);
-            }
-        };
+        // レスポンスをクライアントに返す
+        ctx.status(HttpCode.CREATED).result(order.getOrderId());
     }
 }

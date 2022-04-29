@@ -1,12 +1,10 @@
 package net.ponzmild.producer.domain;
 
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.UUID;
 
 @Getter
-@ToString
 public class TicketOrder {
     private final String orderId;
     private final String contentId;

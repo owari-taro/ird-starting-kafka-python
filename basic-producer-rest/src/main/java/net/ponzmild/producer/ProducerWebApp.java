@@ -1,6 +1,7 @@
 package net.ponzmild.producer;
 
 import io.javalin.Javalin;
+import io.javalin.http.HttpCode;
 import net.ponzmild.producer.client.KafkaProducerFactory;
 import net.ponzmild.producer.controller.OrderController;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,17 +15,32 @@ public class ProducerWebApp {
     private static final OrderController resource = new OrderController(producer);
 
     public static void main(String[] args) {
-        Javalin app = Javalin.create().events(event -> {
+        Javalin app = Javalin.create();
+
+        // ルーティング事前処理
+        app.before(ctx -> {
+            logger.info("Called endpoint: {}", ctx.path());
+        });
+
+        // ルーティング
+        app.post("/ticket", resource::createOrder);
+
+        // エラー発生時のデフォルトルーティング
+        app.exception(Exception.class, (e, ctx) -> {
+            logger.error("Got error.", e);
+            ctx.status(HttpCode.INTERNAL_SERVER_ERROR);
+        });
+
+        // シャットダウン処理を登録
+        Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
+        app.events(event -> {
             event.serverStopping(() -> {
-                logger.info("Kafka producer stopping...");
                 producer.flush();
                 producer.close();
             });
         });
 
-        Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
+        // サーバ起動
         app.start(7070);
-
-        app.post("/ticket", resource.createOrder());
     }
 }
