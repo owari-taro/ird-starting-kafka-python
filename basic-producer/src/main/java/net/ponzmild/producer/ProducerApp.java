@@ -5,15 +5,18 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 public class ProducerApp {
     private static final Logger logger = LoggerFactory.getLogger(ProducerApp.class);
-    private static final String TOPIC = "sample-topic";
+    private static final String TOPIC = "ticket-order";
 
     public static void main(String[] args) {
         logger.info("Producer started.");
 
         // 送信するデータを組み立てる
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, "key1", "value");
+        final String orderId = UUID.randomUUID().toString();
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, orderId, "value");
 
         // Topicにデータを送信
         KafkaProducer<String, String> producer = KafkaProducerFactory.newInstance();
