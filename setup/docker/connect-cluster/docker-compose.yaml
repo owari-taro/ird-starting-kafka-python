@@ -99,9 +99,11 @@ services:
       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadminpassword
 
   source-database:
-    image: postgres:13-alpine
+    image: docker.io/library/postgres:13-alpine
     hostname: source-database
     container_name: source-database
     ports:
@@ -112,6 +114,13 @@ services:
       POSTGRES_DB: irdappdb
     volumes:
       - ./data/postgresql:/docker-entrypoint-initdb.d/
+
+  sink-database:
+    image: docker.io/library/redis:7-alpine
+    hostname: sink-database
+    container_name: sink-database
+    ports:
+      - 6379:6379
 
   sink-storage:
     image: quay.io/minio/minio:RELEASE.2022-06-03T01-40-53Z
