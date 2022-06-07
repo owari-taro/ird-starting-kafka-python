@@ -11,10 +11,10 @@
     "mode": "incrementing",
     "incrementing.column.name": "order_id",
     "validate.non.null": true,
-    "transforms": "createKey,extractInt",
+    "transforms": "createKey,extractUserId",
     "transforms.createKey.type": "org.apache.kafka.connect.transforms.ValueToKey",
-    "transforms.createKey.fields": "order_id",
-    "transforms.extractInt.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
-    "transforms.extractInt.field": "order_id"
+    "transforms.createKey.fields": "user_id",
+    "transforms.extractUserId.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
+    "transforms.extractUserId.field": "user_id"
   }
 }

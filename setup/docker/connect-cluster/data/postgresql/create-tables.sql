@@ -1,5 +1,6 @@
 CREATE TABLE users (
   user_id serial NOT NULL,
+  nickname varchar(50) NOT NULL,
   registered_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   PRIMARY KEY (user_id)
 );

@@ -1,10 +1,10 @@
-insert into users (registered_timestamp)
+insert into users (nickname, registered_timestamp)
 values
-	(CURRENT_TIMESTAMP),
-	(CURRENT_TIMESTAMP),
-	(CURRENT_TIMESTAMP),
-	(CURRENT_TIMESTAMP),
-	(CURRENT_TIMESTAMP);
+	('サンプルA', CURRENT_TIMESTAMP),
+	('サンプルBB', CURRENT_TIMESTAMP),
+	('サンプルCCC', CURRENT_TIMESTAMP),
+	('サンプルDDDD', CURRENT_TIMESTAMP),
+	('サンプルEEEEE', CURRENT_TIMESTAMP);
 
 insert into contents (title, published_timestamp)
 values
