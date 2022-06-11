@@ -2,7 +2,7 @@ version: "3"
 
 services:
   zookeeper:
-    image: docker.io/confluentinc/cp-zookeeper:7.1.0
+    image: docker.io/confluentinc/cp-zookeeper:7.1.1
     hostname: zookeeper
     container_name: zookeeper
     environment:
@@ -13,7 +13,7 @@ services:
       ZOOKEEPER_SYNC_LIMIT: 2
 
   broker-1:
-    image: docker.io/confluentinc/cp-kafka:7.1.0
+    image: docker.io/confluentinc/cp-kafka:7.1.1
     hostname: broker-1
     container_name: broker-1
     depends_on:
@@ -30,7 +30,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
 
   broker-2:
-    image: docker.io/confluentinc/cp-kafka:7.1.0
+    image: docker.io/confluentinc/cp-kafka:7.1.1
     hostname: broker-2
     container_name: broker-2
     depends_on:
@@ -47,7 +47,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
 
   broker-3:
-    image: docker.io/confluentinc/cp-kafka:7.1.0
+    image: docker.io/confluentinc/cp-kafka:7.1.1
     hostname: broker-3
     container_name: broker-3
     depends_on:
@@ -64,7 +64,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
 
   cli:
-    image: docker.io/confluentinc/cp-kafka:7.1.0
+    image: docker.io/confluentinc/cp-kafka:7.1.1
     hostname: cli
     container_name: cli
     depends_on:
@@ -75,7 +75,8 @@ services:
     tty: true
 
   connect:
-    image: docker.io/confluentinc/cp-kafka-connect:7.1.0
+    #image: docker.io/confluentinc/cp-kafka-connect-base:7.1.1
+    image: ird-cp-kafka-connect:1.0.0
     hostname: connect
     container_name: connect
     depends_on:
@@ -97,8 +98,40 @@ services:
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
-      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
       CONNECT_REST_ADVERTISED_HOST_NAME: "localhost"
-      CONNECT_PLUGIN_PATH: /usr/share/java
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadminpassword
+
+  source-database:
+    image: docker.io/library/postgres:13-alpine
+    hostname: source-database
+    container_name: source-database
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: connectuser
+      POSTGRES_PASSWORD: secretdayo
+      POSTGRES_DB: irdappdb
+    volumes:
+      - ./data/postgresql:/docker-entrypoint-initdb.d/
+
+  sink-database:
+    image: docker.io/library/redis:7-alpine
+    hostname: sink-database
+    container_name: sink-database
+    ports:
+      - 6379:6379
+
+  sink-storage:
+    image: quay.io/minio/minio:RELEASE.2022-06-03T01-40-53Z
+    hostname: sink-storage
+    container_name: sink-storage
+    command: minio server /data --console-address ":9001"
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+
 
