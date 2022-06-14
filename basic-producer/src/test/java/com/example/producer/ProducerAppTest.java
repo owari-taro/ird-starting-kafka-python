@@ -1,4 +1,4 @@
-package net.ponzmild.producer;
+package com.example.producer;
 
 import static org.junit.Assert.assertTrue;
 
