@@ -1,4 +1,4 @@
-package net.ponzmild.producer;
+package com.example.producer;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -14,11 +14,14 @@ public class ProducerApp {
     public static void main(String[] args) {
         logger.info("Producer started.");
 
-        // 送信するデータを組み立てる
+        // 送信するイベントを組み立てる
         final String orderId = UUID.randomUUID().toString();
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, orderId, "value");
+        final String userId = "123";
+        final String contentId = "55555";
+        String eventValue = String.format("orderId=%s, userId=%s, contentId=%s", orderId, userId, contentId);
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, orderId, eventValue);
 
-        // Topicにデータを送信
+        // Topicにイベントを送信
         KafkaProducer<String, String> producer = KafkaProducerFactory.newInstance();
         producer.send(producerRecord, (metadata, exception) -> {
             if (exception == null) {
@@ -30,7 +33,7 @@ public class ProducerApp {
             }
         });
 
-        // Producerのバッファに溜まっているデータをTopicに全て送信しきる
+        // Producerのバッファに溜まっているイベントをTopicに全て送信しきる
         producer.flush();
 
         // Kafkaクラスタとの接続を切る
