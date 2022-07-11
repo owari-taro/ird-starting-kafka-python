@@ -1,11 +1,11 @@
 package com.example;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Properties;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
@@ -14,15 +14,14 @@ import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.SlidingWindows;
+import org.apache.kafka.streams.kstream.Suppressed;
+import org.apache.kafka.streams.kstream.Windowed;
+import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.event.TicketOrder;
-import com.example.event.User;
-import com.example.event.UserWithOrders;
-import com.example.event.UserWithOrdersItem;
 import com.example.serdes.TicketOrderSerdes;
-import com.example.serdes.UserSerdes;
 
 /**
  * ストリーム処理のエントリーポイント
@@ -30,9 +29,8 @@ import com.example.serdes.UserSerdes;
 public class StreamApp {
     private static final Logger logger = LoggerFactory.getLogger(StreamApp.class.getName());
     private static final String BOOTSTRAP_SERVERS = "127.0.0.1:29092";
-    private static final String SOURCE_ORDER_TOPIC = "category-filtered-ticket-order";
-    private static final String SOURCE_USER_TOPIC = "category-filtered-ticket-order";
-    private static final String SINK_TOPIC = "suspicious-ticket-order";
+    private static final String SOURCE_TOPIC = "category-filtered-ticket-order";
+    private static final String SINK_TOPIC = "suspicious-user";
 
     public static void main(String[] args) {
         // プロセッサー・トポロジーをビルド
@@ -66,32 +64,33 @@ public class StreamApp {
     private static Topology buildTopology() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
-        // ① ソースプロセッサー (Ticket Order)
-        KStream<String, TicketOrder> ticketOrderStream = streamsBuilder.stream(SOURCE_ORDER_TOPIC, Consumed.with(Serdes.String(), new TicketOrderSerdes()));
+        // ① ソースプロセッサー (Topicからイベントを読み取り)
+        KStream<String, TicketOrder> ticketOrderStream = streamsBuilder.stream(SOURCE_TOPIC,
+                Consumed.with(Serdes.String(), new TicketOrderSerdes()));
 
-        // ② ストリームプロセッサー
-        KStream<String, TicketOrder> aggregatedStream = ticketOrderStream.peek((key, ticketOrder) -> logger.info("Read event w/ key={}", key));
+        // ② キーをユーザーIDに付け替え (ReKey)
+        KStream<String, TicketOrder> userKeyOrderStream = ticketOrderStream
+                .map((key, value) -> KeyValue.pair(value.getUserId(), value));
 
-        // ① ソースプロセッサー (User)
-        KTable<String, User> userTable = streamsBuilder.table(SOURCE_USER_TOPIC, Consumed.with(Serdes.String(), new UserSerdes()));
+        // ③ 時間ウィンドウで集約 (5分のウィンドウ、1分の遅延許容)
+        SlidingWindows window = SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofMinutes(5L), Duration.ofMinutes(1L));
+        KTable<Windowed<String>, Integer> orderCountStream = userKeyOrderStream
+                .groupByKey()
+                .windowedBy(window)
+                .aggregate(
+                        () -> 0,
+                        (key, ticketOrder, orderCount) -> orderCount + 1,
+                        Materialized.as("user-order-counts"))
+                .suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded().shutDownWhenFull()));
 
-        // ② ストリームプロセッサー
-        ticketOrderStream
-            .groupByKey()
-            .windowedBy(SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofMinutes(30L), Duration.ofMinutes(5L)))
-            .aggregate(UserWithOrders::new, (key, ticketOrder, userWithOrders) -> {
-                List<UserWithOrdersItem> orders = userWithOrders.getOrders();
-                UserWithOrdersItem order = new UserWithOrdersItem();
-                order.setOrderId(ticketOrder.getOrderId());
-                order.setContentId(ticketOrder.getContentId());
+        // ④ 時間あたり取引数の多いユーザーを抽出
+        KStream<String, Integer> suspiciousUserStream = orderCountStream
+                .toStream()
+                .filter((userId, orderCount) -> orderCount >= 3)
+                .map((windowedKey, orderCount) -> KeyValue.pair(windowedKey.key(), orderCount));
 
-                userWithOrders.setUserId(key);
-                userWithOrders.setOrders(orders);
-                return userWithOrders;
-            });
-
-        // ③ シンクプロセッサー
-        aggregatedStream.to(SINK_TOPIC, Produced.with(Serdes.String(), new TicketOrderSerdes()));
+        // ⑤ シンクプロセッサー (抽出結果のイベントをTopicに書き戻し)
+        suspiciousUserStream.to(SINK_TOPIC, Produced.with(Serdes.String(), Serdes.Integer()));
 
         // プロセッサー・トポロジーをビルド
         return streamsBuilder.build();

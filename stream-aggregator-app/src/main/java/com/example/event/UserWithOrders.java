@@ -1,10 +1,12 @@
 package com.example.event;
 
-import java.util.List;
-
 public class UserWithOrders {
   private String userId;
-  private List<UserWithOrdersItem> orders;
+  private Integer orderCount;
+
+  public UserWithOrders() {
+    this.orderCount = 0;
+  }
 
   public String getUserId() {
     return userId;
@@ -12,10 +14,10 @@ public class UserWithOrders {
   public void setUserId(String userId) {
     this.userId = userId;
   }
-  public List<UserWithOrdersItem> getOrders() {
-    return orders;
+  public Integer getOrderCount() {
+    return orderCount;
   }
-  public void setOrders(List<UserWithOrdersItem> orders) {
-    this.orders = orders;
-  }
+  public void setOrderCount(Integer orderCount) {
+    this.orderCount = orderCount;
+  }  
 }
