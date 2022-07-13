@@ -10,12 +10,13 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.kstream.SlidingWindows;
 import org.apache.kafka.streams.kstream.Suppressed;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.kstream.Suppressed.BufferConfig;
 import org.slf4j.Logger;
@@ -53,7 +54,7 @@ public class StreamApp {
                 Properties streamConfig = new Properties();
 
                 // (1) 必須の設定値
-                streamConfig.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "filter-streams-app");
+                streamConfig.setProperty(StreamsConfig.APPLICATION_ID_CONFIG, "aggregator-streams-app");
                 streamConfig.setProperty(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
 
                 // (2) デフォルトで使用するイベントのキーと値のシリアライズ/デシリアライズ方法を定義
@@ -73,19 +74,18 @@ public class StreamApp {
                                 Consumed.with(Serdes.String(), new TicketOrderSerdes()));
 
                 // ② キーをユーザーIDに付け替え (ReKey)
-                KStream<String, TicketOrder> userKeyOrderStream = ticketOrderStream
-                                .map((key, value) -> KeyValue.pair(value.getUserId(), value));
-
                 // ③ 時間ウィンドウで集約 (5分のウィンドウ、1分の遅延許容)
-                SlidingWindows window = SlidingWindows.ofTimeDifferenceAndGrace(Duration.ofMinutes(5L),
-                                Duration.ofMinutes(1L));
-                KTable<Windowed<String>, Integer> orderCountStream = userKeyOrderStream
-                                .groupByKey()
+                TimeWindows window = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(5L), Duration.ofMinutes(1L));
+                KTable<Windowed<String>, Integer> orderCountStream = ticketOrderStream
+                                .groupBy(
+                                        (orderId, ticketOrder) -> ticketOrder.getUserId(),
+                                        Grouped.with(Serdes.String(), new TicketOrderSerdes())
+                                )
                                 .windowedBy(window)
                                 .aggregate(
                                                 () -> 0,
                                                 (key, ticketOrder, orderCount) -> orderCount + 1,
-                                                Materialized.as("user-order-counts"))
+                                                Materialized.with(Serdes.String(), Serdes.Integer()))
                                 .suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded().shutDownWhenFull()));
 
                 // ④ 時間あたり取引数の多いユーザーを抽出
