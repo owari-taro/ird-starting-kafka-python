@@ -94,7 +94,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>com.example.producer.ProducerApp</mainClass>
+                  <mainClass>com.example.ProducerApp</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
