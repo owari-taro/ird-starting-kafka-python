@@ -28,7 +28,6 @@ public class ProducerApp {
                 logger.info("Producer sent record: topic={}, partition={}, offset={}", metadata.topic(), metadata.partition(),
                         metadata.offset());
             } else {
-                exception.printStackTrace();
                 logger.error("Producer got error w/ send()", exception);
             }
         });
