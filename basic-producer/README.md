@@ -1,6 +1,7 @@
 # Kafka Producerアプリケーション
 
 書籍の第3章で説明するProducerアプリケーションです。
+Kafkaクラスタにイベントを送信します。
 
 ## Visual Studio Codeからの実行
 
@@ -17,5 +18,5 @@ $ # JARファイルのビルド
 $ mvn clean package -DskipTests
 
 $ # JARファイルからProducerを起動
-$ java -jar basic-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
+$ java -jar target/basic-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
