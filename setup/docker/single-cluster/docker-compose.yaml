@@ -2,7 +2,7 @@ version: "3"
 
 services:
   zookeeper:
-    image: docker.io/confluentinc/cp-zookeeper:7.1.1
+    image: docker.io/confluentinc/cp-zookeeper:7.2.1
     hostname: zookeeper
     container_name: zookeeper
     environment:
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   broker:
-    image: docker.io/confluentinc/cp-kafka:7.1.1
+    image: docker.io/confluentinc/cp-kafka:7.2.1
     hostname: broker
     container_name: broker
     depends_on:
@@ -27,7 +27,7 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   cli:
-    image: docker.io/confluentinc/cp-kafka:7.1.1
+    image: docker.io/confluentinc/cp-kafka:7.2.1
     hostname: cli
     container_name: cli
     depends_on:
