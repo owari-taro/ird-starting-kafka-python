@@ -10,7 +10,6 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.apache.kafka.streams.kstream.Materialized;
@@ -73,28 +72,24 @@ public class StreamApp {
                 KStream<String, TicketOrder> ticketOrderStream = streamsBuilder.stream(SOURCE_TOPIC,
                                 Consumed.with(Serdes.String(), new TicketOrderSerdes()));
 
-                // ② キーをユーザーIDに付け替え (ReKey)
-                // ③ 時間ウィンドウで集約 (5分のウィンドウ、1分の遅延許容)
+                // ② 時間ウィンドウで集約 (5分のウィンドウ、1分の遅延許容)
                 TimeWindows window = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(5L), Duration.ofMinutes(1L));
                 KTable<Windowed<String>, Integer> orderCountStream = ticketOrderStream
-                                .groupBy(
-                                        (orderId, ticketOrder) -> ticketOrder.getUserId(),
-                                        Grouped.with(Serdes.String(), new TicketOrderSerdes())
-                                )
+                                .groupByKey()
                                 .windowedBy(window)
                                 .aggregate(
                                                 () -> 0,
-                                                (key, ticketOrder, orderCount) -> orderCount + 1,
+                                                (key, value, orderCount) -> orderCount + 1,
                                                 Materialized.with(Serdes.String(), Serdes.Integer()))
                                 .suppress(Suppressed.untilWindowCloses(BufferConfig.unbounded().shutDownWhenFull()));
 
-                // ④ 時間あたり取引数の多いユーザーを抽出
+                // ③ 時間あたり取引数の多いユーザーを抽出
                 KStream<String, Integer> suspiciousUserStream = orderCountStream
                                 .toStream()
                                 .filter((userId, orderCount) -> orderCount >= 3)
                                 .map((windowedKey, orderCount) -> KeyValue.pair(windowedKey.key(), orderCount));
 
-                // ⑤ シンクプロセッサー (抽出結果のイベントをTopicに書き戻し)
+                // ④ シンクプロセッサー (抽出結果のイベントをTopicに書き戻し)
                 suspiciousUserStream.to(SINK_TOPIC, Produced.with(Serdes.String(), Serdes.Integer()));
 
                 // プロセッサー・トポロジーをビルド
