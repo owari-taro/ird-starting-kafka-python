@@ -103,7 +103,7 @@ services:
       AWS_SECRET_ACCESS_KEY: minioadminpassword
 
   source-database:
-    image: docker.io/library/postgres:13-alpine
+    image: docker.io/library/postgres:14-alpine
     hostname: source-database
     container_name: source-database
     ports:
