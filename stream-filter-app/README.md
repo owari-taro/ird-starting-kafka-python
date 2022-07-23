@@ -31,6 +31,6 @@ StreamApp.javaの`main`メソッドのクラスファイルを右クリックし
 $ # JARファイルのビルド
 $ mvn clean package -DskipTests
 
-$ # JARファイルからConsumerを起動
+$ # JARファイルからStreamsアプリを起動
 $ java -jar target/stream-filter-app-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
