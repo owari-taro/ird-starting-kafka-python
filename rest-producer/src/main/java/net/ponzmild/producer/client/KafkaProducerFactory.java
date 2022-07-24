@@ -11,7 +11,7 @@ import java.util.Properties;
 public class KafkaProducerFactory {
     private static final String BOOTSTRAP_SERVERS = "127.0.0.1:29092";
     private static final String SERIALIZER_NAME = "org.apache.kafka.common.serialization.StringSerializer";
-    private static final String CLIENT_ID = "basic-producer-rest-1";
+    private static final String CLIENT_ID = "rest-producer-1";
     private static final KafkaProducer<String, String> INSTANCE = new KafkaProducer<>(getProducerConfig());
 
     private KafkaProducerFactory() {
