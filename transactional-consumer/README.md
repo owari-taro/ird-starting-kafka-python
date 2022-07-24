@@ -1,7 +1,8 @@
-# トランザクション機能を利用したProducerアプリケーション
+# トランザクション機能を利用したConsumerアプリケーション
 
-書籍の第5章で説明するProducerアプリケーションです。
-トランザクション機能を有効化したProducerであり、Topicにイベントを送信します。
+書籍の第5章で説明するConsumerアプリケーションです。
+トランザクション機能を有効化したConsumerであり、Topicからイベントを受信します。
+トランザクションが成功したイベントのみ処理対象とします。
 
 ## 事前準備
 
@@ -22,7 +23,7 @@ $ kafka-topics --bootstrap-server broker-1:9092 \
 
 書籍本文中で説明している手順です。
 
-ProducerApp.javaの`main`メソッドのクラスファイルを右クリックして"Run"を選択してください。
+ConsumerApp.javaの`main`メソッドのクラスファイルを右クリックして"Run"を選択してください。
 
 ## JARファイルからの実行
 
@@ -32,6 +33,6 @@ ProducerApp.javaの`main`メソッドのクラスファイルを右クリック�
 $ # JARファイルのビルド
 $ mvn clean package -DskipTests
 
-$ # JARファイルからProducerアプリを起動
-$ java -jar target/transactional-producer-1.0-SNAPSHOT-jar-with-dependencies.jar
+$ # JARファイルからConsumerアプリを起動
+$ java -jar target/transactional-consumer-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
