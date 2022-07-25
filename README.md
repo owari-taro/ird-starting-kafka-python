@@ -4,11 +4,20 @@
 
 ## Content
 
-- `setup` ... ローカルでKafkaクラスタを立てるスクリプト
-  - `single-cluster` ... 第2章以降で使用するクラスタ
-  - `connect-cluster` ... 第6章のKafka ConnectクラスタとKafkaクラスタのサンプル
-- `basic-producer` ... 第3章のProducerアプリケーション
-- `basic-consumer` ... 第4章のConsumerアプリケーション
-- `stream-filter-app` ... 第7章のKafka Streamsアプリケーション
-- `stream-aggregator-app` ... 第7章のKafka Streamsアプリケーション
+### `setup`
+
+書籍内で利用するKafkaクラスタの構築スクリプトを格納しています。
+
+- `single-cluster` ... 第2章以降で使用するBroker1台構成のクラスタ
+- `multi-broker-cluster` ... 第5章と第6章で使用するBroker複数台構成のクラスタ
+- `connect-cluster` ... 第6章のKafka ConnectクラスタとKafkaクラスタのサンプル
+
+### `chapterXX`
+
+章ごとに作成するアプリケーションが格納されています。
+
+### `bonus`
+
+本書では扱えなかったトピックやアプリケーション実装例を格納しています。
+本書を読んだ後のボーナストラックとして探索してみましょう。
 
