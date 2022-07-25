@@ -36,7 +36,7 @@ services:
     tty: true
 
   gui:
-    image: docker.io/obsidiandynamics/kafdrop:latest
+    image: docker.io/obsidiandynamics/kafdrop:3.30.0
     hostname: gui
     container_name: gui
     depends_on:
