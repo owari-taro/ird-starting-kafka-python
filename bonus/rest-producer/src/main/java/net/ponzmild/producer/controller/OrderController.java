@@ -29,7 +29,7 @@ public class OrderController {
         CreateOrderRequest request = ctx.bodyAsClass(CreateOrderRequest.class);
         TicketOrder order = new TicketOrder(request.getContentId(), request.getUserId());
         String recordValueString = mapper.writeValueAsString(order);
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, order.getOrderId(), recordValueString);
+        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(TOPIC, order.getUserId(), recordValueString);
 
         // Topicにデータを非同期に送信
         Future<RecordMetadata> sendFuture = producer.send(producerRecord);
