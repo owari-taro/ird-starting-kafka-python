@@ -10,8 +10,6 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.example.events.TicketOrder;
 import com.example.serdes.TicketOrderSerdes;
@@ -20,7 +18,6 @@ import com.example.serdes.TicketOrderSerdes;
  * イベントをフィルターするSteamsアプリケーションのエントリーポイント
  */
 public class StreamApp {
-    private static final Logger logger = LoggerFactory.getLogger(StreamApp.class.getName());
     private static final String BOOTSTRAP_SERVERS = "127.0.0.1:29092";
     private static final String SOURCE_TOPIC = "ticket-order";
     private static final String SINK_TOPIC = "category-filtered-ticket-order";
@@ -28,7 +25,6 @@ public class StreamApp {
     public static void main(String[] args) {
         // Build processor topology
         Topology topology = buildTopology();
-        logger.info(topology.describe().toString());
 
         // Set properties
         Properties streamConfig = getStreamsConfig();
