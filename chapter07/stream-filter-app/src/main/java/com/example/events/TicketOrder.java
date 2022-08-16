@@ -1,11 +1,16 @@
 package com.example.events;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * チケット取引イベント
  */
 public class TicketOrder {
+  @SerializedName("order_id")
   private String orderId;
+  @SerializedName("user_id")
   private String userId;
+  @SerializedName("content_id")
   private String contentId;
   private String category;
 
