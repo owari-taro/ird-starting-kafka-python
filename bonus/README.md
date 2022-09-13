@@ -19,3 +19,10 @@ JDBC Connectorは定期的にSQL文を発行して差分をイベントに変換
 
 [Debezium](https://debezium.io/)を使用してデータベースのトランザクションログ（PostgreSQLのWAL）をイベントに変換することで、
 レコードの登録、変更、削除を全てイベントに変換するサンプルを提供します。
+
+### `strimzi-kubernetes`
+
+KubernetesにKafkaをデプロイするサンプルを提供します。
+Kafkaのコンポーネントは[Strimzi](https://strimzi.io/)というKubernetes Operatorで作成します。
+
+Kubernetesのマニフェストで宣言的にKafkaクラスタ、Topic、Kafka Connectクラスタ、Connectorを作成します。
