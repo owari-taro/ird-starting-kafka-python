@@ -2,11 +2,15 @@
 
 KubernetesにKafkaクラスタを構築します。
 
+## 前提
+
+Kubernetesクラスタを作成し、`kubectl`コマンドで操作できること。
+
 ## 事前準備
 
-KubernetesにKafkaクラスタおよび関連リソースを立ち上げるためにStrimziをインストールする。
-StrimziはKubernetes Operatorである。
-カスタムリソースを作成することで、Operatorは必要なコンポーネントを作成します。
+KubernetesにKafkaクラスタおよび関連リソースを立ち上げるためにStrimziをインストールします。
+StrimziはKubernetes Operatorです。
+カスタムリソースを作成することで、Operatorは必要なKubernetesリソースを作成します。
 
 ### Operator Lifecycle Managerのインストール
 
@@ -28,7 +32,7 @@ Package server phase: Succeeded
 deployment "packageserver" successfully rolled out
 ```
 
-スクリプト実行後にOLMのPodが起動していることを確認します。
+スクリプト実行後にOLMのPod (コンテナ) が起動していることを確認します。
 
 ```shell
 $ kubectl get po -n olm -w
@@ -61,7 +65,7 @@ $ kubectl apply -f strimzi-kafka-operator.yaml
 subscription.operators.coreos.com/ird-strimzi-kafka-operator created
 ```
 
-ClusterServiceVersionリソースを確認してStrimziのステータスが `Succeeded` になるまで待機します。
+ClusterServiceVersionリソースを確認してStrimziのフェーズが `Succeeded` になるまで待機します。
 
 ```shell
 $ kubectl get csv -n operators -w
@@ -72,7 +76,7 @@ strimzi-cluster-operator.v0.31.0   Strimzi   0.31.0    strimzi-cluster-operator.
 
 ## Kafkaクラスタの作成
 
-Namespaceを作成する。
+Kafkaクラスタ専用のNamespaceを作成します。
 
 ```shell
 $ kubectl apply -f namespace-ird-kafka.yaml        
@@ -86,7 +90,7 @@ $ kubectl apply -f kafka-ird-cluster.yaml
 kafka.kafka.strimzi.io/ird-cluster created
 ```
 
-KafkaクラスタがReadyであることを確認する。
+KafkaクラスタがReadyであることを確認します。
 
 ```shell
 $ kubectl get kafka -n ird-kafka
@@ -110,7 +114,7 @@ ird-cluster-zookeeper-2                        1/1     Running   0          2m53
 Topicリソースを適用して、Kafka Topicを作成します。
 
 ```shell
-$ cat topic-ticket-order.yaml
+$ cat kafkatopic-ticket-order.yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
@@ -122,7 +126,7 @@ spec:
   partitions: 6
   replicas: 3
 
-$ kubectl apply -f topic-ticket-order.yaml
+$ kubectl apply -f kafkatopic-ticket-order.yaml
 kafkatopic.kafka.strimzi.io/ticket-order created
 
 $ kubectl get kafkatopic ticket-order -n ird-kafka
