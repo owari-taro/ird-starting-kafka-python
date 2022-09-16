@@ -3,5 +3,7 @@ spring:
     bootstrap-servers: localhost:29092
     producer:
       client-id: spring-avro-producer
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
       acks: all
       retries: 5
