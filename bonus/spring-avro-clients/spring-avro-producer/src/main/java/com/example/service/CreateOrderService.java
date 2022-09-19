@@ -7,6 +7,7 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import com.example.domain.TicketOrder;
 import com.example.service.command.CreateOrderCommand;
 import com.example.service.result.CreateOrderResult;
 
@@ -15,9 +16,9 @@ import com.example.service.result.CreateOrderResult;
  */
 @Service
 public class CreateOrderService {
-  private final KafkaTemplate<String, String> kafkaTemplate;
+  private final KafkaTemplate<String, TicketOrder> kafkaTemplate;
 
-  public CreateOrderService(KafkaTemplate<String, String> kafkaTemplate) {
+  public CreateOrderService(KafkaTemplate<String, TicketOrder> kafkaTemplate) {
     this.kafkaTemplate = kafkaTemplate;
   }
 
@@ -30,12 +31,17 @@ public class CreateOrderService {
     final String orderId = UUID.randomUUID().toString();
     String userId = command.getUserId();
     String contentId = command.getContentId();
-    String eventValue = String.format("order_id = %s, user_id = %s, content_id = %s", orderId, userId, contentId);
 
-    kafkaTemplate.send("ticket-order", userId, eventValue)
-      .addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+    TicketOrder order = TicketOrder.newBuilder()
+      .setOrderId(orderId)
+      .setUserId(userId)
+      .setContentId(contentId)
+      .build();
+
+    kafkaTemplate.send("ticket-order", userId, order)
+      .addCallback(new ListenableFutureCallback<SendResult<String, TicketOrder>>() {
         @Override
-        public void onSuccess(SendResult<String, String> result) {
+        public void onSuccess(SendResult<String, TicketOrder> result) {
           System.out.println("Sent event successfully!!");
         }
 

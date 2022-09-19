@@ -5,5 +5,7 @@ spring:
       client-id: spring-avro-consumer
       group-id: spring-avro-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.apicurio.registry.serde.avro.AvroKafkaDeserializer
       auto-offset-reset: earliest
+      properties:
+        apicurio.registry.url: http://localhost:8080/apis/registry/v2

@@ -1,9 +1,15 @@
+server:
+  port: 8085
 spring:
   kafka:
     bootstrap-servers: localhost:29092
     producer:
       client-id: spring-avro-producer
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.apicurio.registry.serde.avro.AvroKafkaSerializer
       acks: all
       retries: 5
+      properties:
+        apicurio.registry.url: http://localhost:8080/apis/registry/v2
+        apicurio.registry.find-latest: true
+        apicurio.registry.artifact.group-id: com.example
