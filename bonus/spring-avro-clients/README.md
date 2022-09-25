@@ -3,7 +3,7 @@
 このサンプルでは、KafkaクライアントアプリケーションをSpring Bootフレームワークで実装します。
 また、KafkaとやりとりするイベントをAvroで定義したスキーマでシリアライズします。スキーマ定義は[Apicurio Registry](https://www.apicur.io/registry/)に格納します。
 
-!image[概要図](/assets//image/spring-avro-client-overview.png)
+![概要図](/assets//image/spring-avro-client-overview.png)
 
 ## Quick Start
 
@@ -45,7 +45,7 @@ spring-avro-domainプロジェクトでは、ビルド時に `src/main/avro` デ
 
 アプリケーションのビルド後にApicurio Registryの画面 http://localhost:8080/ui/artifacts を参照すると、`ticket-order-value` という名前でアーティファクト(スキーマ定義)が登録されています。
 
-!image[Apicurio Registryの画面](/assets/image/apicurio-registry-artifacts.png)
+![Apicurio Registryの画面](/assets/image/apicurio-registry-artifacts.png)
 
 ### アプリケーションの実行
 
