@@ -1,0 +1,10 @@
+{
+  "namespace": "com.example.domain",
+  "type": "record",
+  "name": "TicketOrder",
+  "fields": [
+    {"name": "order_id", "type": "string"},
+    {"name": "user_id", "type": "string"},
+    {"name": "content_id", "type": "string"}
+  ]
+}

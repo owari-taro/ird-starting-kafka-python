@@ -1,0 +1,12 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:29092
+    consumer:
+      client-id: spring-avro-consumer
+      group-id: spring-avro-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.apicurio.registry.serde.avro.AvroKafkaDeserializer
+      auto-offset-reset: earliest
+      properties:
+        apicurio.registry.url: http://localhost:8080/apis/registry/v2
+        apicurio.registry.use-specific-avro-reader: true  # デフォルト値だとClassCastExceptionが発生します
