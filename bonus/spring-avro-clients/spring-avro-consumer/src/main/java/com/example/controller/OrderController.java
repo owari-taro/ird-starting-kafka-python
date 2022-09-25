@@ -7,9 +7,9 @@ import com.example.domain.TicketOrder;
 
 @Component
 public class OrderController {
-  @KafkaListener(topics = "ticker-order")
+  @KafkaListener(topics = "ticket-order")
   public void consumeOrder(TicketOrder order) {
-    String msg = String.format("order_id: {}, user_id: {}, content_id: {}",
+    String msg = String.format("order_id: %s, user_id: %s, content_id: %s",
         order.getOrderId(), order.getUserId(), order.getContentId());
     System.out.println(msg);
   }

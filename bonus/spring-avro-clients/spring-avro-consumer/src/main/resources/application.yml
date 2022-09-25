@@ -9,3 +9,4 @@ spring:
       auto-offset-reset: earliest
       properties:
         apicurio.registry.url: http://localhost:8080/apis/registry/v2
+        apicurio.registry.use-specific-avro-reader: true  # デフォルト値だとClassCastExceptionが発生します
